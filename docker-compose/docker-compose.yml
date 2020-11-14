@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME-localstack}"
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+      - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+    environment:
+      - SERVICES=${SERVICES- }
+      - DEBUG=${DEBUG- }
+      - DATA_DIR=${DATA_DIR- }
+      - PORT_WEB_UI=${PORT_WEB_UI- }
+      - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - HOST_TMP_FOLDER=${TMPDIR}
+    volumes:
+      - "${TMPDIR:-/tmp/localstack}:/tmp/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - niks-net
+
+  executor-framework-usecase-study:
+    build: ../
+    ports:
+      - "8050:8050"
+    entrypoint:  sh -c './wait-for.sh --timeout=240 localstack:4566 -- echo "localstack is up now starting application" && java -jar executor-framework-usecase-study-1.0-SNAPSHOT.jar'
+    environment:
+      - AWS_DEFAULT_REGION=us-west-1
+      - AWS_SECRET_ACCESS_KEY=KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK
+      - AWS_ACCESS_KEY_ID=AAAAAAAAAAAAAAAAAAAA
+    depends_on:
+      - localstack
+    networks:
+      - niks-net
+networks:
+  niks-net:
