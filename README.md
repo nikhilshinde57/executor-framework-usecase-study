@@ -1,4 +1,11 @@
-# The Executor Framework Use Case Implementation: Java, Spring Boot, SQS, S3, LocalStack, Java Application Tuning(Xms, Xmx and GC Settings)
+# The Executor Framework Use Case Implementation: Java, Spring Boot, SQS, S3, LocalStack, Java Application Performance Tuning(Xms, Xmx and GC Settings)
+This project demonstrates how we can achieve more throughput using concurrency and parallelism in a multithreading framework. 
+Java provides its own multi-threading framework called the **Executor Framework(EF)**. 
+The project implements EF’s  E2E use case implementation. Along with that while working on highly scalable and 
+available applications most of the time we come across situations where our application performance gets down. 
+In such scenarios the very interesting point comes into the picture that is Application Performance Tuning. 
+As a part of this use case implementation we also touch the **Java Application Performance Tuning** factors like **JVM Heap Size(Xms, Xmx)** 
+and **Garbage Collector** configuration.
 
 ## About Executor Framework
 With the increase in the number of the cores available in the processors nowadays, 
@@ -166,7 +173,7 @@ Note:
 The configurable values like SQS queue url, region, S3 bucket name, S3 file reading thread pool size, S3 file upload thread pool size 
 are such configurable properties you can mange by updating them in environment-local.properties file.
 
-## Application Tuning: Xms, Xmx and GC Settings
+## Application Performance Tuning: Xms, Xmx and GC Settings
 
 #### Tuning Xms and Xmx:
 The application is reading the hundreds of files and keeping it in application memory for further processing.
@@ -182,7 +189,7 @@ To know the default JVM HeapSize configuration Xms(initial Java heap size) and X
     Java(TM) SE Runtime Environment (build 1.8.0_202-b08)
     Java HotSpot(TM) 64-Bit Server VM (build 25.202-b08, mixed mode)
 ```
-The min heap size is 2 GB and max heap size is 4 GB. 
+On local machine(PC) the min heap size is 2 GB and max heap size is 4 GB as shown in above output.
 So if we go with these default configuration and when the consumer application load the more data beyond 4 GB will get the **java.lang.OutOfMemoryError: Java heap space** error.
 Based on application requirement(How much memory it require) we need to set(Tune) those Xms and Xmx values. Those we can set using below command:
 ```
@@ -195,8 +202,9 @@ JVM has four types of GC implementations:
 * **Parallel Garbage Collector**
 * **CMS Garbage Collector**
 * **G1 Garbage Collector**
-
-Again based on application type we can select best one out of above listed. To know all default GC configuration run below command:
+The each above algorithm have some pros and cons. 
+So based on what kind dof work application si doing we can select best suitable one out of above listed. 
+To know all default GC configuration run below command:
 ```
 ➜java -XX:+PrintFlagsFinal|grep Use|grep GC
 
@@ -222,4 +230,3 @@ If we want run our application with G1 as GC, to do that run below command:
 ```
 java -XX:+UseG1GC -jar Application.java
 ``` 
-
