@@ -20,7 +20,7 @@ The Executor API de-couples the execution of task from the actual task to be exe
 * **SingleThreadExecutor** - This thread pool executor has only a single thread. 
 It is used to execute tasks in a **sequential manner**. 
 If the thread dies due to an exception while executing a task, 
-a new thread is created to replace the old thread and the subsequent tasks are executed in the new one
+a new thread is created to replace the old thread and the subsequent tasks are executed in the new one.
 ```
 ExecutorService executorService = Executors.newSingleThreadExecutor()
 ```
@@ -41,7 +41,7 @@ ExecutorService executorService = Executors.newCachedThreadPool();
 ```
 
 * **ScheduledExecutor** - This executor is used when we have a task that needs to be run at regular intervals or if we wish to delay a certain task.
-The tasks can be scheduled in **ScheduledExecutor** using either of the two methods **scheduleAtFixedRate** or **scheduleWithFixedDelay**
+The tasks can be scheduled in **ScheduledExecutor** using either of the two methods **scheduleAtFixedRate** or **scheduleWithFixedDelay**.
 
 This project implements **FixedThreadPool(n)** executor type.
 
@@ -110,7 +110,7 @@ docker run localstack/localstack
 ```
 Note: Once the localstack container is up kindly check the port numbers for S3 and SQS service are correct or not and matching with below urls.
 If not, then you need to change those to the one which your localstack container showing and update the environment-local. properties file
-Once the local stack environment is ready run the below commands
+Once the local stack environment is ready run the below commands.
 
 Create bucket on S3: 
 ```
@@ -128,7 +128,7 @@ Note: Here 12345/input is a folder path where we are uploading files. The number
 Also, the sac/main/resources/input directory have some test files. So, you need to upload those using above cmd.
 The root directory will change by machine to machine so change that accordingly.
 
-Verify the files are uploaded or not
+Verify the files are uploaded or not.
 ```
 aws --endpoint-url=http://localhost:4566 s3 ls s3://niks --recursive
 ```
@@ -139,7 +139,7 @@ mvn spring-boot:run
 ```
 
 ####  Test Application
-Run all unit test cases. From project root directory run below file
+Run all unit test cases. From project root directory run below file.
 
 ```$xslt
 ./test-runner.sh
@@ -148,7 +148,7 @@ To test application, publish the message on niks-merge-files-event queue.
 ```
 aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url http://localhost:4566/000000000000/niks-merge-files-event --message-body "{\"bucketName\":\"niks\",\"folderName\":\"input\",\"folderPath\":\"niks\/12345\/input\/\",\"tenantId\":\"12345\"}"
 ```
-Make sure the details are correct and are same as we used while uploading files on S3
+Make sure the details are correct and are same as we used while uploading files on S3.
 
 After that kindly have a look on application logs where you will see message processing details.
 The end application log will look like this
