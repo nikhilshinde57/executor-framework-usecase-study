@@ -1,6 +1,6 @@
 # The Executor Framework Use Case Implementation: Java, Spring Boot, SQS, S3, LocalStack, Java Application Performance Tuning(Xms, Xmx and GC Settings)
 This project demonstrates how we can achieve more throughput using concurrency and parallelism in a multithreading framework. 
-Java provides its own multi-threading framework called the **Executor Framework(EF)**. 
+Java provides its own multi-threading framework called the **Executor Framework (EF)**. 
 The project implements EF’s  E2E use case implementation. Along with that while working on highly scalable and 
 available applications most of the time we come across situations where our application performance gets down. 
 In such scenarios the very interesting point comes into the picture that is Application Performance Tuning. 
@@ -49,48 +49,48 @@ This project implements **FixedThreadPool(n)** executor type.
 
 #### Functional Requirement
 * Assume we have a folder directory present on S3 which contains the list of files
-* The each file in the directory contians the text data such that 
+* Each file in the directory contains the text data such that 
 each line having single word
 * All words are ordered in a sorted order
 * The task is to read all the files from the input S3 directory and 
 prepare single output file from those input files provided that the data 
 in output file should be sorted
 
-#### Non Functional Requirement
-* The S3 input directory can have hundreds of file in it
+#### Non-Functional Requirement
+* The S3 input directory can have hundreds of files in it
 * The minimum file size is like file with one word and maximum file size we are considering here is 200 MB
 * As soon as file uploading finishes on S3, processing should get start
 * The system should be scalable and highly available
-* If anything fails report it as a event or alert
+* If anything fails report it as an event or alert
     
 ## Solution Approach  
 
 ### Event Driven:
-As the application requirement is the input directory will contains hundreds of files with large data.
+As the application requirement is the input directory will contain hundreds of files with large data.
 Taking that point into consideration S3 is the best storage place to store such large data files.
 To make our system highly scalable, available and for real time processing event driven approach will be perfect fit for this.
 
 When the files are uploaded on S3. The uploading system will publish the event on SQS.
 The Spring boot application (Consumer Application) having the consumers running those will listen to that queue and once the message published
 they will consume that message.
-Once the message get consumed the message processing service will start the processing of that message.
+Once the message gets consumed the message processing service will start the processing of that message.
 That message will contain the directory which we would like to process. The sample message will look like below.
 ```
 {
-"bucketName":"niks",
+"bucket Name":"niks",
 "folderName":"input",
 "folderPath":"niks/12345/input/",
 "tenantId":"12345"
 }
 ```
-The consumer application validate and parse the message. After that it will pass that message to message processing service(MPS). 
+The consumer application validates and parse the message. After that it will pass that message to message processing service (MPS). 
 It will count the number of files present in the directory and calculate the batch size based on thread pool size number. 
 We are using **FixedThreadPool(n)** service multithreading pattern. Using that MPS will read multiple files in parallel from the S3 bucket.
 
-The thread pool size is configurable and that can be configureable from environment-local.properties file.
+The thread pool size is configurable and that can be configurable from environment local. Properties file.
 Once all the batches completed their job, next task is to write those batch list into one file in a sorted way.
 So here task is to merge K-sorted lists.
-For merging K-sorted files minheap is the best DS. That having complexity of O( n * k * log k); Where n is number of array/list and k is number of element in it.
+For merging K-sorted files minheap is the best DS. That having complexity of O (n * k * log k); Where n is number of array/list and k is number of elements in it.
 After merging will get single list of words will upload that on S3 in output directory.
 Considering the output file is very large so, that operation also we are doing parallelly by multiple thread.    
 
@@ -109,7 +109,7 @@ docker pull localstack/localstack
 docker run localstack/localstack
 ```
 Note: Once the localstack container is up kindly check the port numbers for S3 and SQS service are correct or not and matching with below urls.
-If not then you need to change those to the one which your localstack container showing and update the environment-local.properties file
+If not, then you need to change those to the one which your localstack container showing and update the environment-local. properties file
 Once the local stack environment is ready run the below commands
 
 Create bucket on S3: 
@@ -124,8 +124,8 @@ Upload data on S3:
 ```
 aws --endpoint-url=http://localhost:4566 s3 cp ~/executor-framework-usecase-study/src/main/resources/input s3://niks/12345/input --recursive
 ```
-Note:Here 12345/input is a folder path where we are uploading files. The number 12345 represent the client id.
-Also the src/main/resources/input directory have some test files. So you need to upload those using above cmd.
+Note: Here 12345/input is a folder path where we are uploading files. The number 12345 represent the client id.
+Also, the sac/main/resources/input directory have some test files. So, you need to upload those using above cmd.
 The root directory will change by machine to machine so change that accordingly.
 
 Verify the files are uploaded or not
@@ -144,7 +144,7 @@ Run all unit test cases. From project root directory run below file
 ```$xslt
 ./test-runner.sh
 ``` 
-To test application publish the message on niks-merge-files-event queue.
+To test application, publish the message on niks-merge-files-event queue.
 ```
 aws --endpoint-url=http://localhost:4566 sqs send-message --queue-url http://localhost:4566/000000000000/niks-merge-files-event --message-body "{\"bucketName\":\"niks\",\"folderName\":\"input\",\"folderPath\":\"niks\/12345\/input\/\",\"tenantId\":\"12345\"}"
 ```
@@ -171,7 +171,7 @@ aws --endpoint-url=http://localhost:4566 s3 cp s3://niks/12345/output/{output_fi
 
 Note:
 The configurable values like SQS queue url, region, S3 bucket name, S3 file reading thread pool size, S3 file upload thread pool size 
-are such configurable properties you can mange by updating them in environment-local.properties file.
+are such configurable properties you can manage by updating them in environment-local.properties file.
 
 ## Application Performance Tuning: Xms, Xmx and GC Settings
 
@@ -189,9 +189,9 @@ To know the default JVM HeapSize configuration Xms(initial Java heap size) and X
     Java(TM) SE Runtime Environment (build 1.8.0_202-b08)
     Java HotSpot(TM) 64-Bit Server VM (build 25.202-b08, mixed mode)
 ```
-On local machine(PC) the min heap size is 2 GB and max heap size is 4 GB as shown in above output.
-So if we go with these default configuration and when the consumer application load the more data beyond 4 GB will get the **java.lang.OutOfMemoryError: Java heap space** error.
-Based on application requirement(How much memory it require) we need to set(Tune) those Xms and Xmx values. Those we can set using below command:
+On local machine (PC) the min heap size is 2 GB and max heap size is 4 GB as shown in above output.
+So, if we go with these default configurations and when the consumer application loads the more data beyond 4 GB will get the **java.lang.OutOfMemoryError: Java heap space** error.
+Based on application requirement (How much memory it require) we need to set(Tune) those Xms and Xmx values. Those we can set using below command:
 ```
 export _JAVA_OPTIONS="-Xms512m -Xmx8024m"
 ```
@@ -203,7 +203,7 @@ JVM has four types of GC implementations:
 * **CMS Garbage Collector**
 * **G1 Garbage Collector**
 The each above algorithm have some pros and cons. 
-So based on what kind dof work application si doing we can select best suitable one out of above listed. 
+So, based on what kind of work application is doing we can select best suitable one out of above listed. 
 To know all default GC configuration run below command:
 ```
 ➜java -XX:+PrintFlagsFinal|grep Use|grep GC
@@ -226,7 +226,7 @@ To know all default GC configuration run below command:
      bool UseSerialGC                               = false                               {product}
 ```
 In Java 8 the default one is Parallel Garbage Collector as you can see in above output.
-If we want run our application with G1 as GC, to do that run below command:
+If we want to run our application with G1 as GC, to do that run below command:
 ```
 java -XX:+UseG1GC -jar Application.java
-``` 
+```
